@@ -1,0 +1,552 @@
+---
+title: "Project Starter Scrape Code"
+output: html_notebook
+---
+
+#### Load Packages
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(genius)
+library(plyr)
+library(dplyr)
+library(qdap)
+library(tidytext)
+library(gridExtra)
+
+```
+
+#### Scrape and create table of records from 1980s
+```{r}
+# read webpage for Grammy Awards
+webpage <- read_html("https://en.wikipedia.org/wiki/Grammy_Award_for_Record_of_the_Year")
+
+# copy xpath for table of 1980s
+XPATH80 <- '/html/body/div[3]/div[3]/div[5]/div[1]/table[5]'
+
+# run the following to create table of songs from 1980s
+table_1980 <- 
+  webpage %>%
+  html_nodes(xpath = XPATH80) %>%
+  html_table(fill = TRUE)
+
+d1980 <- table_1980[[1]]
+```
+
+#### Header that illustrates what how table should like like after scraping - should have 60 obs and 4 variables
+
+```{r}
+head(d1980)
+```
+#### Scrape and create table of records from 1990s
+```{r}
+webpage <- read_html("https://en.wikipedia.org/wiki/Grammy_Award_for_Record_of_the_Year")
+
+# copy xpath for table of 1980s
+XPATH90 <- '/html/body/div[3]/div[3]/div[5]/div[1]/table[6]'
+
+
+# run the following to create table of songs from 1980s
+table_1990 <- 
+  webpage %>%
+  html_nodes(xpath = XPATH90) %>%
+  html_table(fill = TRUE)
+
+d1990 <- table_1990[[1]]
+```
+
+
+
+```{r}
+head(d1990)
+```
+
+
+#### Scrape and create table of records from 2000's
+```{r}
+webpage <- read_html("https://en.wikipedia.org/wiki/Grammy_Award_for_Record_of_the_Year")
+
+# copy xpath for table of 1980s
+XPATH00 <- '/html/body/div[3]/div[3]/div[5]/div[1]/table[7]'
+
+
+# run the following to create table of songs from 1980s
+table_2000 <- 
+  webpage %>%
+  html_nodes(xpath = XPATH00) %>%
+  html_table(fill = TRUE)
+
+d2000 <- table_2000[[1]]
+```
+
+```{r}
+head(d2000)
+```
+
+#### Scrape and create table of records from 2010's
+```{r}
+webpage <- read_html("https://en.wikipedia.org/wiki/Grammy_Award_for_Record_of_the_Year")
+
+# copy xpath for table of 1980s
+XPATH10 <- '/html/body/div[3]/div[3]/div[5]/div[1]/table[8]'
+
+
+# run the following to create table of songs from 1980s
+table_2010 <- 
+  webpage %>%
+  html_nodes(xpath = XPATH10) %>%
+  html_table(fill = TRUE)
+
+d2010 <- table_2010[[1]]
+```
+
+
+```{r}
+head(d2010)
+```
+
+#### Data cleaning for 1980's
+
+##### Renames all the columns
+```{r}
+ROY80s<- d1980 %>%
+  dplyr::rename(year = `Year[I]`,
+  track = `Record`,
+  artist = `Artist(s)`)
+```
+
+##### Selects year, track and artist and onmits the NA's in the data
+```{r}
+ROY80s<- na.omit(ROY80s)%>%
+  select(year, track, artist)
+
+
+```
+
+##### Replaces [x] with " "
+```{r}
+ROY80s<-
+  ROY80s%>%
+  mutate(year = gsub(pattern = "(\\[\\d+\\])", replacement = "", x = year)) 
+```
+
+##### header to check results
+```{r}
+head(ROY80s)
+```
+
+```{r}
+# get lyrics for songs 1980s
+lyrics80s <- ROY80s %>%
+  add_genius(artist, track, type = "lyrics")
+```
+
+
+```{r}
+head(lyrics80s)
+```
+
+#### Data Cleaning 1990
+```{r}
+ROY90s<- d1990 %>%
+  dplyr::rename(year = `Year[I]`,
+  track = `Record`,
+  artist = `Artist(s)`)
+```
+
+
+```{r}
+ROY90s<- na.omit(ROY90s)%>%
+  select(year, track, artist)
+
+
+```
+
+```{r}
+ROY90s<-
+  ROY90s%>%
+  mutate(year = gsub(pattern = "(\\[\\d+\\])", replacement = "", x = year)) 
+```
+
+
+```{r}
+head(ROY90s)
+```
+
+```{r}
+# get lyrics for songs 1990s
+lyrics90s <- ROY90s %>%
+  add_genius(artist, track, type = "lyrics")
+```
+
+```{r}
+head(lyrics90s)
+```
+
+
+
+#### Cleaning for 2000's
+
+```{r}
+ROY00s<- d2000 %>%
+  dplyr::rename(year = `Year[I]`,
+  track = `Record`,
+  artist = `Artist(s)`)
+```
+
+
+```{r}
+ROY00s<- na.omit(ROY00s)%>%
+  select(year, track, artist)
+
+
+```
+
+```{r}
+ROY00s<-
+  ROY00s%>%
+  mutate(year = gsub(pattern = "(\\[\\d+\\])", replacement = "", x = year)) 
+```
+
+
+```{r}
+head(ROY00s)
+```
+
+
+```{r}
+# get lyrics for songs 2000s
+lyrics00s <- ROY00s %>%
+  add_genius(artist, track, type = "lyrics")
+
+
+```
+
+
+#### Cleaning for 2010's
+
+```{r}
+ROY10s<- d2010 %>%
+  dplyr::rename(year = `Year[I]`,
+  track = `Record`,
+  artist = `Artist(s)`)
+```
+
+
+```{r}
+ROY10s<- na.omit(ROY10s)%>%
+  select(year, track, artist)
+
+
+```
+
+```{r}
+ROY10s<-
+  ROY10s%>%
+  mutate(year = gsub(pattern = "(\\[\\d+\\])", replacement = "", x = year)) 
+```
+
+
+```{r}
+head(ROY10s)
+```
+
+```{r}
+# get lyrics for songs 2010s
+lyrics10s <- ROY10s %>%
+  add_genius(artist, track, type = "lyrics")
+
+```
+
+
+```{r}
+AllLyrics<-rbind(lyrics80s,lyrics90s,lyrics00s, lyrics10s)
+```
+
+```{r}
+DecadesLyrics<-
+  AllLyrics%>%
+  mutate(year = as.numeric(year))%>%
+  mutate(decade= floor(year - year %% 10))
+```
+
+```{r}
+DecadeVerseWords <- DecadesLyrics %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+PerTrack <- 
+  DecadeVerseWords%>%
+  group_by(track,decade)%>%
+  mutate(decade=as.character(decade))%>%
+  dplyr::summarise(total =n() )
+  
+
+```
+
+
+
+#### Graph 1
+
+
+```{r}
+ggplot(PerTrack) +
+ aes(x = decade, y = total, fill = decade) +
+ geom_boxplot() +
+ scale_fill_hue() +
+ labs(x = "Decade", y = "Words per song", title = "Boxplots of Words per Grammy Nominated Song by Decade") +
+ theme_minimal() +
+ theme(legend.position = "none")
+```
+
+
+```{r}
+TopTenWords <- freq_terms(DecadesLyrics$lyric, 10, at.least=3, 
+                    stopwords=tidytext::stop_words$word)
+plot(TopTenWords)
+```
+
+
+```{r}
+VerseWords <- DecadesLyrics %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+ft <- VerseWords %>%
+  anti_join(stop_words)
+
+```
+
+
+```{r}
+pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
+TopTenDecade <- ft %>%
+  dplyr::count(word, sort = TRUE) %>%
+  filter(n >= 3) %>%
+  filter(!grepl(pattern, word)) %>% 
+  top_n(10) %>%
+  mutate(word=reorder(word,desc(n)))
+
+
+TopTen
+```
+
+
+
+
+#### Graph 2
+
+```{r}
+ggplot(TopTenDecade) +
+ aes(x = word, weight = n) +
+ geom_bar(fill = "#1f9e89") +
+ labs(x = "Word", y = "Count", title = "Ten Most Popular Words of Grammy Nominated Songs from 1980 - 2019.") +
+ theme_minimal()
+```
+#### 80s
+```{r}
+TopTen80s <- freq_terms(lyrics80s$lyric, 10, at.least=3, 
+                    stopwords=tidytext::stop_words$word)
+plot(TopTen80s)
+```
+
+
+```{r}
+VerseWords80s <- lyrics80s %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+ft80s <- VerseWords80s %>%
+  anti_join(stop_words)
+
+```
+
+
+```{r}
+pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
+TopTen80s <- ft80s %>%
+  dplyr::count(word, sort = TRUE) %>%
+  filter(n >= 3) %>%
+  filter(!grepl(pattern, word)) %>% 
+  top_n(10) %>%
+  mutate(word=reorder(word,desc(n)))
+
+
+TopTen80s
+```
+
+
+#### 90s
+
+```{r}
+TopTen90s <- freq_terms(lyrics90s$lyric, 10, at.least=3, 
+                    stopwords=tidytext::stop_words$word)
+plot(TopTen90s)
+```
+
+
+```{r}
+VerseWords90s <- lyrics90s %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+ft90s <- VerseWords90s %>%
+  anti_join(stop_words)
+
+```
+
+
+```{r}
+pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
+TopTen90s <- ft90s %>%
+  dplyr::count(word, sort = TRUE) %>%
+  filter(n >= 3) %>%
+  filter(!grepl(pattern, word)) %>% 
+  top_n(10) %>%
+  mutate(word=reorder(word,desc(n)))
+
+
+TopTen90s
+```
+
+#### 2000s
+```{r}
+TopTen00s <- freq_terms(lyrics00s$lyric, 10, at.least=3, 
+                    stopwords=tidytext::stop_words$word)
+plot(TopTen00s)
+```
+
+
+```{r}
+VerseWords00s <- lyrics00s %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+ft00s <- VerseWords00s %>%
+  anti_join(stop_words)
+
+```
+
+
+```{r}
+pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
+TopTen00s <- ft00s %>%
+  dplyr::count(word, sort = TRUE) %>%
+  filter(n >= 3) %>%
+  filter(!grepl(pattern, word)) %>% 
+  top_n(10) %>%
+  mutate(word=reorder(word,desc(n)))
+
+
+TopTen00s
+```
+#### 2010s
+```{r}
+TopTen10s <- freq_terms(lyrics10s$lyric, 10, at.least=3, 
+                    stopwords=tidytext::stop_words$word)
+plot(TopTen10s)
+```
+
+
+```{r}
+VerseWords10s <- lyrics10s %>%
+  unnest_tokens(word, lyric)
+```
+
+
+```{r}
+ft10s <- VerseWords10s %>%
+  anti_join(stop_words)
+
+```
+
+
+```{r}
+pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
+TopTen10s <- ft10s %>%
+  dplyr::count(word, sort = TRUE) %>%
+  filter(n >= 3) %>%
+  filter(!grepl(pattern, word)) %>% 
+  top_n(10) %>%
+  mutate(word=reorder(word,desc(n)))
+
+
+TopTen10s
+```
+
+
+#### Steps for Graph 3
+```{r}
+p1<-
+  ggplot(TopTen80s) +
+ aes(x = word, weight = n) +
+ geom_bar(fill = "#0c4c8a") +
+ labs(x = "Word", y = "Count", title = "1980s") +
+ theme_minimal()
+```
+
+```{r}
+p2<-
+ggplot(TopTen90s) +
+ aes(x = word, weight = n) +
+ geom_bar(fill = "#FFC0CB") +
+ labs(x = "Word", y = "Count", title = "1990s") +
+  
+ theme_minimal()
+```
+
+```{r}
+p3<-
+  ggplot(TopTen00s) +
+ aes(x = word, weight = n) +
+ geom_bar(fill = "#FF0000") +
+ labs(x = "Word", y = "Count", title = "2000s") +
+  
+ theme_minimal()
+```
+
+
+```{r}
+p4<-
+ggplot(TopTen00s) +
+ aes(x = word, weight = n) +
+ geom_bar(fill = "#00FFFF") +
+ labs(x = "Word", y = "Count", title = "2010s") +
+  
+ theme_minimal()
+```
+
+
+
+```{r}
+PlotsList<- list(p1,p2,p3,p4)
+```
+
+
+#### Graph 3
+```{r}
+grid.arrange(grobs = PlotsList, ncol = 2, top = "Top ten words by decade" )
+
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+

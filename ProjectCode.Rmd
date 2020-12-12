@@ -252,6 +252,7 @@ ROY10s<-
 head(ROY10s)
 ```
 
+
 ```{r}
 # get lyrics for songs 2010s
 lyrics10s <- ROY10s %>%
@@ -259,29 +260,31 @@ lyrics10s <- ROY10s %>%
 
 ```
 
-
+###### This Data frame combines all the lyrics of all the years.
 ```{r}
 AllLyrics<-rbind(lyrics80s,lyrics90s,lyrics00s, lyrics10s)
 ```
 
+###### This data frame, makes a new variable decade to categorize all the lyrics of songs decade wise
 ```{r}
 DecadesLyrics<-
   AllLyrics%>%
-  mutate(year = as.numeric(year))%>%
+  mutate(year = as.numeric(year))%>% #converts year into numeric
   mutate(decade= floor(year - year %% 10))
 ```
 
+###### This data frame converts the DecadesLyrics data frame into words of all the lyrics of the songs.
 ```{r}
 DecadeVerseWords <- DecadesLyrics %>%
   unnest_tokens(word, lyric)
 ```
 
-
+###### This data frame, groups by track and decade and gives us the words per song by each decade
 ```{r}
 PerTrack <- 
   DecadeVerseWords%>%
   group_by(track,decade)%>%
-  mutate(decade=as.character(decade))%>%
+  mutate(decade=as.character(decade))%>% #converts decade into character variable 
   dplyr::summarise(total =n() )
   
 
@@ -290,8 +293,7 @@ PerTrack <-
 
 
 #### Graph 1
-
-
+This
 ```{r}
 ggplot(PerTrack) +
  aes(x = decade, y = total, fill = decade) +

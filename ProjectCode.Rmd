@@ -1,5 +1,6 @@
 ---
 title: "Project Starter Scrape Code"
+author: "Paridhi Khandelwal"
 output: html_notebook
 ---
 
@@ -14,6 +15,8 @@ library(dplyr)
 library(qdap)
 library(tidytext)
 library(gridExtra)
+library(ggplot2)
+library(methods)
 
 ```
 
@@ -138,16 +141,18 @@ head(ROY80s)
 
 ```{r}
 # get lyrics for songs 1980s
-lyrics80s <- ROY80s %>%
+Lyrics80s <- ROY80s %>%
   add_genius(artist, track, type = "lyrics")
 ```
 
 
 ```{r}
-head(lyrics80s)
+head(Lyrics80s)
 ```
 
 #### Data Cleaning 1990
+
+##### Renames all the columns
 ```{r}
 ROY90s<- d1990 %>%
   dplyr::rename(year = `Year[I]`,
@@ -155,7 +160,7 @@ ROY90s<- d1990 %>%
   artist = `Artist(s)`)
 ```
 
-
+##### Selects year, track and artist and onmits the NA's in the data
 ```{r}
 ROY90s<- na.omit(ROY90s)%>%
   select(year, track, artist)
@@ -163,31 +168,33 @@ ROY90s<- na.omit(ROY90s)%>%
 
 ```
 
+##### Replaces [x] with " "
 ```{r}
 ROY90s<-
   ROY90s%>%
   mutate(year = gsub(pattern = "(\\[\\d+\\])", replacement = "", x = year)) 
 ```
 
-
+##### header to check results
 ```{r}
 head(ROY90s)
 ```
 
 ```{r}
 # get lyrics for songs 1990s
-lyrics90s <- ROY90s %>%
+Lyrics90s <- ROY90s %>%
   add_genius(artist, track, type = "lyrics")
 ```
 
 ```{r}
-head(lyrics90s)
+head(Lyrics90s)
 ```
 
 
 
 #### Cleaning for 2000's
 
+##### Renames all the columns
 ```{r}
 ROY00s<- d2000 %>%
   dplyr::rename(year = `Year[I]`,
@@ -195,7 +202,7 @@ ROY00s<- d2000 %>%
   artist = `Artist(s)`)
 ```
 
-
+##### Selects year, track and artist and onmits the NA's in the data
 ```{r}
 ROY00s<- na.omit(ROY00s)%>%
   select(year, track, artist)
@@ -203,6 +210,7 @@ ROY00s<- na.omit(ROY00s)%>%
 
 ```
 
+##### Replaces [x] with " "
 ```{r}
 ROY00s<-
   ROY00s%>%
@@ -217,7 +225,7 @@ head(ROY00s)
 
 ```{r}
 # get lyrics for songs 2000s
-lyrics00s <- ROY00s %>%
+Lyrics00s <- ROY00s %>%
   add_genius(artist, track, type = "lyrics")
 
 
@@ -226,6 +234,7 @@ lyrics00s <- ROY00s %>%
 
 #### Cleaning for 2010's
 
+##### Renames all the columns
 ```{r}
 ROY10s<- d2010 %>%
   dplyr::rename(year = `Year[I]`,
@@ -233,7 +242,7 @@ ROY10s<- d2010 %>%
   artist = `Artist(s)`)
 ```
 
-
+##### Selects year, track and artist and onmits the NA's in the data
 ```{r}
 ROY10s<- na.omit(ROY10s)%>%
   select(year, track, artist)
@@ -241,6 +250,7 @@ ROY10s<- na.omit(ROY10s)%>%
 
 ```
 
+##### Replaces [x] with " "
 ```{r}
 ROY10s<-
   ROY10s%>%
@@ -252,48 +262,46 @@ ROY10s<-
 head(ROY10s)
 ```
 
-
 ```{r}
 # get lyrics for songs 2010s
-lyrics10s <- ROY10s %>%
+Lyrics10s <- ROY10s %>%
   add_genius(artist, track, type = "lyrics")
 
 ```
 
-###### This Data frame combines all the lyrics of all the years.
+##### This combines all the lyrics from all the years
 ```{r}
-AllLyrics<-rbind(lyrics80s,lyrics90s,lyrics00s, lyrics10s)
+AllLyrics<-rbind(Lyrics80s,Lyrics90s,Lyrics00s, Lyrics10s)
 ```
 
-###### This data frame, makes a new variable decade to categorize all the lyrics of songs decade wise
+
+##### This data frame, combines all the lyrics of all the years and divides them by decade, by adding a new column decade
 ```{r}
 DecadesLyrics<-
   AllLyrics%>%
-  mutate(year = as.numeric(year))%>% #converts year into numeric
+  mutate(year = as.numeric(year))%>%
   mutate(decade= floor(year - year %% 10))
 ```
 
-###### This data frame converts the DecadesLyrics data frame into words of all the lyrics of the songs.
+##### This data frame breaks down the DecadesLyrics data frame where there were lyrics to words by decade
 ```{r}
 DecadeVerseWords <- DecadesLyrics %>%
   unnest_tokens(word, lyric)
 ```
 
-###### This data frame, groups by track and decade and gives us the words per song by each decade
+
+##### This data frame, groups DecadeVerseWords by track and decade and summarises it which gives us total number of words per songs by decade.
 ```{r}
 PerTrack <- 
   DecadeVerseWords%>%
   group_by(track,decade)%>%
-  mutate(decade=as.character(decade))%>% #converts decade into character variable 
+  mutate(decade=as.character(decade))%>%
   dplyr::summarise(total =n() )
   
 
 ```
 
-
-
 #### Graph 1
-This
 ```{r}
 ggplot(PerTrack) +
  aes(x = decade, y = total, fill = decade) +
@@ -303,14 +311,18 @@ ggplot(PerTrack) +
  theme_minimal() +
  theme(legend.position = "none")
 ```
+##### Graph 1 is a representation of Words per Grammy nominated song by decade. For this graph, we used the DecadeLyrics,DecadeVerseWords and PerTrack data frame. Step by step , we broke down sings into lyrics by decade, then we moved on to break down lyrics into words of each song by decade, and in the end, we count words per song by decade by grouping it by track and decade and summarising it to get the result.
 
 
+
+#### Steps for Graph 2
+
+##### This data frame takes out the the top ten words regardless of the year and filters the stop_words from the list
 ```{r}
 TopTenWords <- freq_terms(DecadesLyrics$lyric, 10, at.least=3, 
                     stopwords=tidytext::stop_words$word)
 plot(TopTenWords)
 ```
-
 
 ```{r}
 VerseWords <- DecadesLyrics %>%
@@ -324,7 +336,7 @@ ft <- VerseWords %>%
 
 ```
 
-
+##### This data frame removes all the extra stop_words from the the dataframe and gives us the updated list of the top ten words.
 ```{r}
 pattern<-"(ba|du|yeah|da|ya|ooh|gonna|na|uh|la|hol)"
 TopTenDecade <- ft %>%
@@ -334,11 +346,7 @@ TopTenDecade <- ft %>%
   top_n(10) %>%
   mutate(word=reorder(word,desc(n)))
 
-
-TopTen
 ```
-
-
 
 
 #### Graph 2
@@ -348,18 +356,21 @@ ggplot(TopTenDecade) +
  aes(x = word, weight = n) +
  geom_bar(fill = "#1f9e89") +
  labs(x = "Word", y = "Count", title = "Ten Most Popular Words of Grammy Nominated Songs from 1980 - 2019.") +
- theme_minimal()
+ theme_minimal()+
+ theme(plot.title = element_text(size=15))
 ```
-#### 80s
+##### Graph 2 represents the Top Ten Most popular words from 1980-2019 and gives a count of how many times that word has been used . For this graph we found the top ten most popular words used and then we filtered out the stop words to get a better analysis. Surprising it is found that "love" is the most popular word of them all from 1980-2019.
+
+#### Taking out Top Ten popular words for 1980s
 ```{r}
-TopTen80s <- freq_terms(lyrics80s$lyric, 10, at.least=3, 
+TopTen80s <- freq_terms(Lyrics80s$lyric, 10, at.least=3, 
                     stopwords=tidytext::stop_words$word)
 plot(TopTen80s)
 ```
 
 
 ```{r}
-VerseWords80s <- lyrics80s %>%
+VerseWords80s <- Lyrics80s %>%
   unnest_tokens(word, lyric)
 ```
 
@@ -384,18 +395,16 @@ TopTen80s <- ft80s %>%
 TopTen80s
 ```
 
-
-#### 90s
-
+#### Taking out Top Ten popular words for 1990s
 ```{r}
-TopTen90s <- freq_terms(lyrics90s$lyric, 10, at.least=3, 
+TopTen90s <- freq_terms(Lyrics90s$lyric, 10, at.least=3, 
                     stopwords=tidytext::stop_words$word)
 plot(TopTen90s)
 ```
 
 
 ```{r}
-VerseWords90s <- lyrics90s %>%
+VerseWords90s <- Lyrics90s %>%
   unnest_tokens(word, lyric)
 ```
 
@@ -420,16 +429,16 @@ TopTen90s <- ft90s %>%
 TopTen90s
 ```
 
-#### 2000s
+#### Taking out Top Ten popular words for 2000s
 ```{r}
-TopTen00s <- freq_terms(lyrics00s$lyric, 10, at.least=3, 
+TopTen00s <- freq_terms(Lyrics00s$lyric, 10, at.least=3, 
                     stopwords=tidytext::stop_words$word)
 plot(TopTen00s)
 ```
 
 
 ```{r}
-VerseWords00s <- lyrics00s %>%
+VerseWords00s <- Lyrics00s %>%
   unnest_tokens(word, lyric)
 ```
 
@@ -453,16 +462,16 @@ TopTen00s <- ft00s %>%
 
 TopTen00s
 ```
-#### 2010s
+#### Taking out Top Ten popular words for 2010s
 ```{r}
-TopTen10s <- freq_terms(lyrics10s$lyric, 10, at.least=3, 
+TopTen10s <- freq_terms(Lyrics10s$lyric, 10, at.least=3, 
                     stopwords=tidytext::stop_words$word)
 plot(TopTen10s)
 ```
 
 
 ```{r}
-VerseWords10s <- lyrics10s %>%
+VerseWords10s <- Lyrics10s %>%
   unnest_tokens(word, lyric)
 ```
 
@@ -489,8 +498,10 @@ TopTen10s
 
 
 #### Steps for Graph 3
+
+##### Made a plot for the top ten words used in 1980's and removed the stop words
 ```{r}
-p1<-
+P1<-
   ggplot(TopTen80s) +
  aes(x = word, weight = n) +
  geom_bar(fill = "#0c4c8a") +
@@ -498,8 +509,9 @@ p1<-
  theme_minimal()
 ```
 
+##### Made a plot for the top ten words used in 1990's and removed the stop words
 ```{r}
-p2<-
+P2<-
 ggplot(TopTen90s) +
  aes(x = word, weight = n) +
  geom_bar(fill = "#FFC0CB") +
@@ -508,8 +520,9 @@ ggplot(TopTen90s) +
  theme_minimal()
 ```
 
+##### Made a plot for the top ten words used in 2000's and removed the stop words
 ```{r}
-p3<-
+P3<-
   ggplot(TopTen00s) +
  aes(x = word, weight = n) +
  geom_bar(fill = "#FF0000") +
@@ -518,9 +531,9 @@ p3<-
  theme_minimal()
 ```
 
-
+##### Made a plot for the top ten words used in 2010's and removed the stop words
 ```{r}
-p4<-
+P4<-
 ggplot(TopTen00s) +
  aes(x = word, weight = n) +
  geom_bar(fill = "#00FFFF") +
@@ -529,23 +542,123 @@ ggplot(TopTen00s) +
  theme_minimal()
 ```
 
-
-
+##### Made a list of all the plots from 1980-2010
 ```{r}
-PlotsList<- list(p1,p2,p3,p4)
+PlotsList<- list(P1,P2,P3,P4)
 ```
-
 
 #### Graph 3
 ```{r}
 grid.arrange(grobs = PlotsList, ncol = 2, top = "Top ten words by decade" )
 
 ```
+##### Graph 3 shows us the Top ten word of each decade. To make this Graph 3, I indivually took out the top ten words of each decade, and then made a plot using ggplot for each decade. To combine all the plots I used grid.arrange function to combine all the plots in a single graph.
 
-```{r}
+#### Steps for Graph 4
+
+##### This data frame inner joins the DecadeVerseWords and sentiments table from the tidytext package. it also groups by decade, word, year and sentiment.
+```{r} 
+Sentiments<-
+  DecadeVerseWords%>%
+  inner_join(sentiments, by="word")%>%
+  group_by(decade, word, year, sentiment)
 
 ```
 
+##### This data frame, makes all the 'positive' as 1 and 'negative' as 0 in the sentiment variable. This step also converts the decade as a character.
+```{r}
+Sentimentsnp<-
+  Sentiments%>%
+  mutate(sentiment= gsub(pattern = "positive", replacement = "1", x= sentiment))%>%
+  mutate(sentiment= gsub(pattern = "negative", replacement = "0", x= sentiment))%>%
+  mutate(decade =as.character(decade))
+```
+
+#### This data frame groups by sentiment year and secade. it also filter the data for where sentiment >0 i.e 1 and then summarises ti get the count
+```{r}
+SentimentYear<-Sentimentsnp%>%
+  group_by(sentiment,year,decade)%>%
+  filter(sentiment>0)%>%
+  dplyr::summarise(count=n())
+```
+
+#### Graph 4
+```{r}
+ggplot(SentimentYear) +
+  aes(x = year, fill = decade, weight = count) +
+  geom_bar() +
+  scale_fill_hue() +
+  labs(x = "Year", y = "Net Sentiment", title = "Net Sentiment Score by Year") +
+  theme_minimal()
+```
+##### Graph 4 gives us the net sentiment score by year and colors the bars respective to the decade they belong to. From the fraph we can see that 2019 has the highest net sentiment score from all the years, and 2011 has the lowest net sentiment score of them all. To make this graph, I joined the sentiments table with the DecadeVerseWords and then calculated where the sentiment was positive and summariesed to get a count for each year.
+
+#### Steps for Graph 5
+
+##### This data fram groups by decade and sentiment and filters it when sentiment =1, it also then summarises the count of all the values grouped by decade.
+```{r}
+SentimentDecade<-
+  Sentimentsnp%>%
+  group_by(sentiment, decade)%>%
+  filter(sentiment>0)%>%
+  dplyr::summarise(count=n())
+
+```
+
+##### This data frame gives us the Mean sentiment score by decade. As we know there are 10 years in a decade. I divided and floored the the new column by count/10 to get the everage. It also adds an "s" to all value int he variable decade.
+```{r}
+MeanSentimentDecade<-
+  SentimentDecade%>%
+  mutate(decade= ifelse(grepl("1980", decade), "1980s", 
+                  ifelse(grepl("1990", decade), "1990s",
+                  ifelse(grepl("2000", decade), "2000s",
+                  ifelse(grepl("2010", decade), "2010s", "Other")))))%>%
+mutate(mean_sentiment = count/10)
+  
+  
+
+MeanSentimentDecade
+```
+
+
+#### Graph 5
+```{r}
+ggplot(MeanSentimentDecade) +
+ aes(x = decade, fill = decade, weight = mean_sentiment) +
+ geom_bar() +
+ scale_fill_hue() +
+ labs(x = "Decade", y = "Mean Sentiment Score", title = "Mean Sentiment Score by Decade") +
+ theme_minimal()
+```
+##### Graph 5 shows us the Mean sentiment score by decade. As we can see 2010's again has the highest mean sentiment score and 1990 has the lowest mean sentiment score. To make this graph, I grouped by decade and sentiment and then calculated where sentiment =1 to give us the count of the sentiment score. 
+
+#### Graph 6
+
+##### This data frame adds s to all the values in the variable decade in SentimentYear
+```{r}
+SentimentYear1<-
+  SentimentYear%>%
+    mutate(decade= ifelse(grepl("1980", decade), "1980s", 
+                  ifelse(grepl("1990", decade), "1990s",
+                  ifelse(grepl("2000", decade), "2000s",
+                  ifelse(grepl("2010", decade), "2010s", "Other")))))
+  
+```
+
+
+
+```{r}
+ggplot(SentimentYear1) +
+ aes(x = year, y = count,color =decade) +
+ geom_point(size = 1L) +
+ scale_color_hue() +
+ geom_smooth( aes(group = 1), method ="loess" , formula = y ~ x, se = FALSE)+
+ labs(x = "Year", y = "Net Sentiment", title = "Net Sentiment Score by Year of Grammy Nominated Records from 1980 - 2019 with Linear Model Fit") +
+ theme_minimal()+
+ theme(plot.title = element_text(size=10))
+```
+
+##### This graph gives us the net sentiment score by year of grammy nominated records from 1980-2019. It also gives us a linear model fit. This graph was made using gg plot and the linear model fir using deom_smooth. This gave us the trend by setting a linear model fit in the graph. In this graph we colored the geom_points based on decade.
 
 
 

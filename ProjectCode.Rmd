@@ -656,15 +656,5 @@ ggplot(SentimentYear1) +
 ##### This graph gives us the net sentiment score by year of grammy nominated records from 1980-2019. It also gives us a linear model fit. This graph was made using gg plot and the linear model by using geom_smooth. This gave us the trend by setting a linear model fit in the graph. In this graph we colored the geom_points based on decade. Simple regression models are used to show or predict the relationship between two variables, here Year and net sentiment.
 
 
-#### Link for my Zoom Presentation
-
-[Zoom Presenation Link](https://psu.zoom.us/rec/play/wU0LZC7EgtGvfGAWNKz9wJC6qkCYdcXHWrxWU28k8lWilJIGBvFcxqgXVUw_w7Kwe2gQObmaqCVuMVNU.R-Tc9ZoJXQxVE0iR?autoplay=true&startTime=1607953245000)
-
-
-
-#### Link for the Webpage (Extra Credit)
-
-
-[Webpage Link](https://paridhi1603.github.io/ParidhiKhandelwal.github.io/ProjectCode.nb.html)
 
 
